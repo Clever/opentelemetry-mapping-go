@@ -80,14 +80,14 @@ func transform(lr plog.LogRecord, host, service string, res pcommon.Resource, lo
 
 	// we need to set log attributes as AdditionalProperties
 	// AdditionalProperties are treated as Datadog Log Attributes
-	var status string
+	// var status string
 	lr.Attributes().Range(func(k string, v pcommon.Value) bool {
 		switch strings.ToLower(k) {
 		// set of remapping are taken from Datadog Backend
 		case "msg", "message", "log":
 			l.Message = v.AsString()
-		case "status", "severity", "level", "syslog.severity":
-			status = v.AsString()
+		// case "severity", "syslog.severity":
+		// 	status = v.AsString()
 		case "traceid", "trace_id", "contextmap.traceid", "oteltraceid":
 			traceID, err := decodeTraceID(v.AsString())
 			if err != nil {
@@ -145,23 +145,23 @@ func transform(lr plog.LogRecord, host, service string, res pcommon.Resource, lo
 
 	// we want to use the serverity that client has set on the log and let Datadog backend
 	// decide the appropriate level
-	if lr.SeverityText() != "" {
-		if status == "" {
-			status = lr.SeverityText()
-		}
-		l.AdditionalProperties[otelSeverityText] = lr.SeverityText()
-	}
-	if lr.SeverityNumber() != 0 {
-		if status == "" {
-			status = statusFromSeverityNumber(lr.SeverityNumber())
-		}
-		l.AdditionalProperties[otelSeverityNumber] = strconv.Itoa(int(lr.SeverityNumber()))
-	}
-	l.AdditionalProperties[ddStatus] = status
+	// if lr.SeverityText() != "" {
+	// 	if status == "" {
+	// 		status = lr.SeverityText()
+	// 	}
+	// 	l.AdditionalProperties[otelSeverityText] = lr.SeverityText()
+	// }
+	// if lr.SeverityNumber() != 0 {
+	// 	if status == "" {
+	// 		status = statusFromSeverityNumber(lr.SeverityNumber())
+	// 	}
+	// 	l.AdditionalProperties[otelSeverityNumber] = strconv.Itoa(int(lr.SeverityNumber()))
+	// }
+	// l.AdditionalProperties[ddStatus] = status
 	// for Datadog to use the same timestamp we need to set the additional property of "@timestamp"
 	if lr.Timestamp() != 0 {
 		// we are retaining the nano second precision in this property
-		l.AdditionalProperties[otelTimestamp] = strconv.FormatInt(lr.Timestamp().AsTime().UnixNano(), 10)
+		// l.AdditionalProperties[otelTimestamp] = strconv.FormatInt(lr.Timestamp().AsTime().UnixNano(), 10)
 		l.AdditionalProperties[ddTimestamp] = lr.Timestamp().AsTime().Format("2006-01-02T15:04:05.000Z07:00")
 	}
 	if l.Message == "" {
